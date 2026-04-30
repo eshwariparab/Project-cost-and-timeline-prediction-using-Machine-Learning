@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Cost & Time Predictor | ML-Powered Estimation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="8" fill="#6366f1"/>
+                        <path d="M20 10L28 18H24V26H16V18H12L20 10Z" fill="white"/>
+                    </svg>
+                    <h1>Project Predictor</h1>
+                </div>
+                <div class="header-actions">
+                    <button id="viewHistory" class="secondary-button">View History</button>
+                    <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+                </div>
+            </div>
+            <p class="tagline">AI-Powered Cost & Time Estimation for Civil & Software Projects</p>
+            
+            <!-- Project Type Toggle Slider -->
+            <div class="project-type-toggle">
+                <div class="toggle-container">
+                    <span class="toggle-label" id="constructionLabel">Civil</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="projectTypeToggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-label" id="softwareLabel">Software</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="dual-forms-container">
+            <!-- Construction Form Section -->
+            <div class="form-section construction-section active" id="constructionSection">
+                <div class="form-container">
+                    <h2>🏗️ Civil Project Estimation</h2>
+                    <form id="constructionForm" class="project-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="project_size_sqft">
+                                    <span class="label-text">Project Size</span>
+                                    <span class="label-hint">(sq. ft.)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="project_size_sqft" 
+                                    name="project_size_sqft"
+                                    placeholder="e.g., 5000"
+                                    min="100"
+                                    step="10"
+                                    required
+                                >
+                                <small>Built-up area of the project</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="num_workers">
+                                    <span class="label-text">Number of Workers</span>
+                                    <span class="label-hint">(integer)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="num_workers" 
+                                    name="num_workers"
+                                    placeholder="e.g., 20"
+                                    min="1"
+                                    step="1"
+                                    required
+                                >
+                                <small>Total workers on the project</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="material_quality">
+                                    <span class="label-text">Material Quality</span>
+                                    <span class="label-hint">(1 = Low, 2 = Medium, 3 = High)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="material_quality" 
+                                    name="material_quality"
+                                    placeholder="e.g., 2"
+                                    min="1"
+                                    max="3"
+                                    step="1"
+                                    required
+                                >
+                                <small>Overall quality level of materials</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="project_complexity">
+                                    <span class="label-text">Project Complexity</span>
+                                    <span class="label-hint">(1 = Low, 5 = Very High)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="project_complexity" 
+                                    name="project_complexity"
+                                    placeholder="e.g., 3"
+                                    min="1"
+                                    max="5"
+                                    step="1"
+                                    required
+                                >
+                                <small>Overall structural and logistical complexity</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="equipment_count">
+                                    <span class="label-text">Equipment Count</span>
+                                    <span class="label-hint">(integer)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="equipment_count" 
+                                    name="equipment_count"
+                                    placeholder="e.g., 10"
+                                    min="0"
+                                    step="1"
+                                    required
+                                >
+                                <small>Total major equipment items assigned</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="team_experience_years">
+                                    <span class="label-text">Team Experience</span>
+                                    <span class="label-hint">(years)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="team_experience_years" 
+                                    name="team_experience_years"
+                                    placeholder="e.g., 8"
+                                    min="0"
+                                    step="1"
+                                    required
+                                >
+                                <small>Average experience of the core team</small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="predict-button">
+                            <span class="button-text">Predict Total Cost & Time</span>
+                            <span class="button-loader" style="display: none;">
+                                <span class="spinner"></span> Processing...
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Software Form Section -->
+            <div class="form-section software-section" id="softwareSection">
+                <div class="form-container">
+                    <h2>💻 Software Project Estimation</h2>
+                    <form id="softwareForm" class="project-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="team_exp">
+                                    <span class="label-text">Team Experience</span>
+                                    <span class="label-hint">(2-9)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="team_exp" 
+                                    name="team_exp"
+                                    placeholder="e.g., 3"
+                                    min="2"
+                                    max="9"
+                                    step="1"
+                                    required
+                                >
+                                <small>Team experience level</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="manager_exp">
+                                    <span class="label-text">Manager Experience</span>
+                                    <span class="label-hint">(3-9)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="manager_exp" 
+                                    name="manager_exp"
+                                    placeholder="e.g., 4"
+                                    min="3"
+                                    max="9"
+                                    step="1"
+                                    required
+                                >
+                                <small>Manager experience level</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transactions">
+                                    <span class="label-text">Number of Transactions</span>
+                                    <span class="label-hint">(integer)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="transactions" 
+                                    name="transactions"
+                                    placeholder="e.g., 200"
+                                    min="1"
+                                    required
+                                >
+                                <small>Total number of transactions in the system</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="entities">
+                                    <span class="label-text">Number of Entities</span>
+                                    <span class="label-hint">(integer)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="entities" 
+                                    name="entities"
+                                    placeholder="e.g., 100"
+                                    min="1"
+                                    required
+                                >
+                                <small>Total number of entities/data objects</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="points_non_adjust">
+                                    <span class="label-text">Function Points (Non-Adjusted)</span>
+                                    <span class="label-hint">(integer)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="points_non_adjust" 
+                                    name="points_non_adjust"
+                                    placeholder="e.g., 300"
+                                    min="1"
+                                    required
+                                >
+                                <small>Initial size of the software before applying complexity adjustments</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="adjustment">
+                                    <span class="label-text">Adjustment Factor</span>
+                                    <span class="label-hint">(0.80-1.50)</span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="adjustment" 
+                                    name="adjustment"
+                                    placeholder="e.g., 1.0"
+                                    min="0.80"
+                                    max="1.50"
+                                    step="0.01"
+                                    required
+                                >
+                                <small>Multiplier that adjusts function points based on system complexity</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="language">
+                                    <span class="label-text">Language Level</span>
+                                </label>
+                                <select id="language" name="language" required>
+                                    <option value="">Select language</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                                <small>Programming language complexity level</small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="predict-button">
+                            <span class="button-text">Predict Total Cost & Time</span>
+                            <span class="button-loader" style="display: none;">
+                                <span class="spinner"></span> Processing...
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Container -->
+            <div class="results-container" id="resultsContainer" style="display: none;">
+                <h2>Prediction Results</h2>
+                <div class="results-grid">
+                    <div class="result-card cost-card">
+                        <div class="result-icon">💰</div>
+                        <div class="result-label">Predicted Cost</div>
+                        <div class="result-value" id="predicted_cost">₹0</div>
+                        <div class="result-description">Estimated project cost including overheads</div>
+                    </div>
+                    <div class="result-card time-card">
+                        <div class="result-icon">⏱️</div>
+                        <div class="result-label">Predicted Time</div>
+                        <div class="result-value" id="predicted_time">0 days</div>
+                        <div class="result-description">Estimated project completion time</div>
+                    </div>
+                </div>
+                <div class="error-message" id="errorMessage" style="display: none;"></div>
+            </div>
+
+            <!-- History Container -->
+            <div class="history-container" id="historyContainer" style="display: none;">
+                <h2>Prediction History</h2>
+                <div class="history-list" id="historyList">
+                    <!-- History items will be loaded here -->
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p></p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
